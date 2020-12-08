@@ -1,6 +1,7 @@
 module Main where
 
 import Data.Maybe
+import Data.Either
 import Data.List
 
 parseLine :: String -> (String, Int)
@@ -11,20 +12,10 @@ parseLine s =
 parse :: [String] -> [(String, Int)]
 parse = map parseLine 
 
-
-executeInf :: [(String, Int)] -> [Int] -> Int -> Int -> Int
-executeInf xs visited i acc
-  | i `elem` visited = acc
-  | op == "nop" = executeInf xs (i:visited) (i+1) acc
-  | op == "jmp" = executeInf xs (i:visited) (i+val) acc
-  | op == "acc" = executeInf xs (i:visited) (i+1) (acc + val)
-
-  where (op, val) = xs !! i
-
-execute :: [(String, Int)] -> Int -> [Int] -> Int -> Int -> Maybe Int
+execute :: [(String, Int)] -> Int -> [Int] -> Int -> Int -> Either Int Int
 execute xs i visited end acc 
-  | i == end = Just acc
-  | i `elem` visited = Nothing
+  | i == end = Right acc
+  | i `elem` visited = Left acc
   | op == "nop" = execute xs (i+1) (i:visited) end acc
   | op == "jmp" = execute xs (i+val) (i:visited) end acc
   | op == "acc" = execute xs (i+1) (i:visited) end (acc+val)
@@ -36,14 +27,15 @@ replaceAll xs acc
   | op == "nop" = (reverse (("jmp", val):acc)++tail xs) : replaceAll (tail xs) ((op,val):acc)
   | op == "jmp" = (reverse (("nop", val):acc)++tail xs) : replaceAll (tail xs) ((op,val):acc)
   | otherwise = replaceAll (tail xs) ((op,val):acc)
-
   where (op, val) = head xs
 
 main :: IO ()
 main = do 
   input <- lines <$> readFile "input.txt"
 
-  print $ executeInf (parse input) [] 0 0
   let instr = parse input
-  let res = find (\xs -> isJust $ execute xs 0 [] (length instr) 0) $ replaceAll instr []
-  print $ fromJust $ execute (fromJust res) 0 [] (length instr) 0
+      len   = length instr
+  print $ fromLeft 0 $ execute instr 0 [] len 0
+
+  let res = find (\xs -> isRight $ execute xs 0 [] len 0) $ replaceAll instr []
+  print $ fromRight 0 $ execute (fromJust res) 0 [] len 0
