@@ -23,7 +23,7 @@ solve_1 :: [Op] -> [Bitflip] -> Memory -> Int
 solve_1 [] _ mem = sum $ map snd $ Map.toList mem
 solve_1 (Mask (bflips,_) : xs) _ mem = solve_1 xs bflips mem
 solve_1 (Asn a b : xs) mask mem = 
-  solve_1 xs mask (Map.insert a (foldl (\n f -> f n) b mask) mem)
+  solve_1 xs mask (Map.insert a (foldl (flip ($)) b mask) mem)
 
 
 
@@ -41,9 +41,9 @@ solve_2 :: [Op] -> Mask -> Memory -> Int
 solve_2 [] _ mem = sum $ map snd $ Map.toList mem
 solve_2 (Mask mask : xs) _ mem = solve_2 xs mask mem
 solve_2 (Asn a b   : xs) (bflips, floats) memory = 
-  solve_2 xs (bflips, floats) $ foldl (\mem addr -> Map.insert addr b mem) memory addrs
-  where addr = foldl (\n f -> f n) a bflips
-        addrs = foldl (flip concatMap) [addr] floats
+  solve_2 xs (bflips, floats) $ foldl (flip (`Map.insert` b)) memory addrs
+  where addr = foldl (flip ($)) a bflips
+        addrs = foldl (>>=) [addr] floats
 
 
 ------------------ Main --------------------
@@ -57,8 +57,9 @@ parseOp parser s =
   
 main :: IO ()
 main = do 
-  input <- map (parseOp parseMask) . lines <$> readFile "input.txt"
-  print $ solve_1 (tail input) ((\(Mask (mask,_)) -> mask) $ head input) Map.empty
+  input <- lines <$> readFile "input.txt"
+  let ops1 = map (parseOp parseMask ) input
+      ops2 = map (parseOp parseMask2) input
 
-  input <- map (parseOp parseMask2) . lines <$> readFile "input.txt"
-  print $ solve_2 (tail input) ((\(Mask mask) -> mask) $ head input) Map.empty
+  print $ solve_1 (tail ops1) ((\(Mask m) -> fst m) $ head ops1) Map.empty
+  print $ solve_2 (tail ops2) ((\(Mask m) -> m    ) $ head ops2) Map.empty
