@@ -1,8 +1,8 @@
 module Main where
 
-import qualified Data.Map.Strict as Map
+import qualified Data.IntMap.Strict as Map
 
-solve :: Int -> Map.Map Int Int -> Int -> Int -> Int
+solve :: Int -> Map.IntMap Int -> Int -> Int -> Int
 solve limit mem t prev 
   | t == limit = prev
   | otherwise =
@@ -16,4 +16,4 @@ main = do
 
   print $ solve 2021 initMemory (length input+1) (last input)
   print $ solve 30000001 initMemory (length input+1) (last input)
-  -- Runtime about 1:20m for part 2.
+  -- Runtime about 50s for part 2.
