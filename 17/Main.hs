@@ -1,0 +1,73 @@
+module Main where
+
+import Data.List
+import Data.Array
+import Data.Array.MArray
+import Data.Array.IO
+import Data.Foldable
+import Control.Monad
+
+type Point = (Int, Int, Int)
+
+sumTuple :: Point -> Point -> Point
+sumTuple (z1,y1,x1) (z2,y2,x2) = (z1+z2, y1+y2, x1+x2)
+
+dirs :: [Point]
+dirs = [(z,y,x) | z <- [-1..1], y <- [-1..1], x <- [-1..1], (z,y,x) /= (0,0,0)]
+
+neighbours :: Point -> [Point]
+neighbours p = map (sumTuple p) dirs
+
+count :: Char -> String -> Int
+count x = length . filter (==x)
+
+newState :: Array Point Char -> Point -> Maybe Char
+newState arr pos = 
+  let alive = count '#' $ map (arr !) $ neighbours pos
+      curr   = arr ! pos
+  in 
+    if curr == '#' && (alive > 3 || alive < 2) then Just '.'
+    else if curr == '.' && alive == 3 then Just '#'
+    else Nothing
+  
+update :: Array Point Char -> IOUArray Point Char -> Point -> IO ()
+update immutarr mutarr p = 
+  forM_ (newState immutarr p) (writeArray mutarr p)
+
+pointsBetween :: Point -> Point -> [Point]
+pointsBetween (lz,ly,lx) (uz,uy,ux) = 
+  [(z,y,x) | z <- [lz..uz], y <- [ly..uy], x <- [lx..ux]]
+
+generation :: IOUArray Point Char -> IO ()
+generation mutarr = do 
+  immutarr <- freeze mutarr 
+
+  let (l,u) = bounds immutarr
+  
+  mapM_ (update immutarr mutarr) $ pointsBetween (sumTuple (1,1,1) l) (sumTuple (-1,-1,-1) u)
+
+countAlive :: Array Point Char -> Int
+countAlive immutarr = 
+  let (l,u) = bounds immutarr
+  
+  in foldl (\acc p -> if immutarr ! p == '#' then acc+1 else acc) 0 $ pointsBetween (sumTuple (1,1,1) l) (sumTuple (-1,-1,-1) u)
+
+main :: IO ()
+main = do 
+  input <- lines <$> readFile "input.txt" -- Part 1: 448
+  let c = 7
+      width  = length (head input) + 1
+      height = length input + 1
+
+  -- Using (z,y,x) format since that makes it print correctly
+  mutarr <- newArray ((-c,-c,-c), (c,height+c,width+c)) '.' :: IO (IOUArray Point Char)
+
+  let init = [(e, (x,y)) | (y,es) <- zip [0..] input, (x,e) <- zip [0..] (input !! y)]
+  mapM_ (\(e, (x,y)) -> writeArray mutarr (0,y, x) e) init
+
+
+  replicateM_ 6 (generation mutarr)
+
+  immutarr <- freeze mutarr :: IO (Array Point Char)
+  -- print immutarr
+  print $ countAlive immutarr
