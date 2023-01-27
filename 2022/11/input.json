@@ -1,0 +1,58 @@
+{
+  "Monkey 0": {
+    "items": "65, 78",
+    "Operation": "old * 3",
+    "Test": "5",
+    "true": "2",
+    "false": "3"
+  },
+  "Monkey 1": {
+    "items": "54, 78, 86, 79, 73, 64, 85, 88",
+    "Operation": "old + 8",
+    "Test": "11",
+    "true": "4",
+    "false": "7"
+  },
+  "Monkey 2": {
+    "items": "69, 97, 77, 88, 87",
+    "Operation": "old + 2",
+    "Test": "2",
+    "true": "5",
+    "false": "3"
+  },
+  "Monkey 3": {
+    "items": "99",
+    "Operation": "old + 4",
+    "Test": "13",
+    "true": "1",
+    "false": "5"
+  },
+  "Monkey 4": {
+    "items": "60, 57, 52",
+    "Operation": "old * 19",
+    "Test": "7",
+    "true": "7",
+    "false": "6"
+  },
+  "Monkey 5": {
+    "items": "91, 82, 85, 73, 84, 53",
+    "Operation": "old + 5",
+    "Test": "3",
+    "true": "4",
+    "false": "1"
+  },
+  "Monkey 6": {
+    "items": "88, 74, 68, 56",
+    "Operation": "old * old",
+    "Test": "17",
+    "true": "0",
+    "false": "2"
+  },
+  "Monkey 7": {
+    "items": "54, 82, 72, 71, 53, 99, 67",
+    "Operation": "old + 1",
+    "Test": "19",
+    "true": "6",
+    "false": "0"
+  }
+}

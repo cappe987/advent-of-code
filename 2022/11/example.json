@@ -1,0 +1,30 @@
+{
+  "Monkey 0": {
+    "items": "79, 98",
+    "Operation": "old * 19",
+    "Test": "23",
+    "true": "2",
+    "false": "3"
+  },
+  "Monkey 1": {
+    "items": "54, 65, 75, 74",
+    "Operation": "old + 6",
+    "Test": "19",
+    "true": "2",
+    "false": "0"
+  },
+  "Monkey 2": {
+    "items": "79, 60, 97",
+    "Operation": "old * old",
+    "Test": "13",
+    "true": "1",
+    "false": "3"
+  },
+  "Monkey 3": {
+    "items": "74",
+    "Operation": "old + 3",
+    "Test": "17",
+    "true": "0",
+    "false": "1"
+  }
+}
