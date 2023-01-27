@@ -13,7 +13,8 @@ if [ "$#" -ne 0 ]; then
 fi
 
 for i in $(seq 1 25); do
-	if [ -d "$i" ]; then
-		do_day $i
+	dir=$(printf "%02d" $i)
+	if [ -d "$dir" ]; then
+		do_day $dir
 	fi
 done
