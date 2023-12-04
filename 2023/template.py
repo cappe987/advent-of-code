@@ -14,6 +14,4 @@ data = open("example.txt").readlines()
 
 
 print(f"Part 1: {res}")
-
-
 print(f"Part 2: {res}")
