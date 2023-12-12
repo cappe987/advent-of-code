@@ -51,4 +51,4 @@ for line in data[2:]:
     m[x[0]] = (x[2][1:4], x[3][:3])
 
 print(f"Part 1: {part_1(steps, m)}")
-print(f"Part 1: {part_2(steps, m)}")
+print(f"Part 2: {part_2(steps, m)}")
