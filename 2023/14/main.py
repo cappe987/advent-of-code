@@ -6,25 +6,20 @@ data = open("example.txt").readlines()
 data = open("input.txt").readlines()
 
 def tilt(grid, direction):
+    start, end, step = (0, len(grid), 1)
     if direction == 'N':
-        istart, iend, istep = (0, len(grid), 1)
-        jstart, jend, jstep = (0, len(grid[0]), 1)
         move = (-1, 0)
-    elif direction == 'E':
-        istart, iend, istep = (0, len(grid), 1)
-        jstart, jend, jstep = (len(grid[0])-1, -1, -1)
-        move = (0, 1)
     elif direction == 'W':
-        istart, iend, istep = (0, len(grid), 1)
-        jstart, jend, jstep = (0, len(grid[0]), 1)
         move = (0, -1)
-    elif direction == 'S':
-        istart, iend, istep = (len(grid)-1, -1, -1)
-        jstart, jend, jstep = (0, len(grid[0]), 1)
-        move = (1, 0)
+    else:
+        start, end, step = (len(grid)-1, -1, -1)
+        if direction == 'E':
+            move = (0, 1)
+        elif direction == 'S':
+            move = (1, 0)
 
-    for i in range(istart, iend, istep):
-        for j in range(jstart, jend, jstep):
+    for i in range(start, end, step):
+        for j in range(start, end, step):
             if grid[i][j] == 'O':
                 i2,j2 = (i+move[0],j+move[1])
                 while in_range_grid(grid, i2, j2) and grid[i2][j2] == '.':
@@ -35,20 +30,19 @@ def tilt(grid, direction):
                 grid[i2][j2] = 'O'
 
 def score(grid):
-    istart, iend, istep = (0, len(grid), 1)
-    jstart, jend, jstep = (0, len(grid[0]), 1)
     score = 0
-    for i in range(istart, iend, istep):
-        for j in range(jstart, jend, jstep):
+    for i in range(len(grid)):
+        for j in range(len(grid[0])):
             if grid[i][j] == 'O':
                 score += len(grid)-i
-
     return score
 
+# Part 1
 grid = [list(line.strip()) for line in data]
 tilt(grid, "N")
 print(f"Part 1: {score(grid)}")
 
+# Part 2. Find cycle
 grid = [list(line.strip()) for line in data]
 grids = {}
 for i in range(1000000000):
@@ -59,12 +53,11 @@ for i in range(1000000000):
         break
     grids[t] = i
 
-t = tuple([tuple(x) for x in grid])
-ti = grids[t]
-cycle_length = i - ti
-x = 1000000000-ti
-in_cycle = x % cycle_length
-idx = in_cycle + ti-1
+# Find where in the cycle 1B is
+cycle_start = grids[t]
+cycle_length = i - cycle_start
+cycle_pos = (1000000000-cycle_start) % cycle_length
+idx = cycle_start + cycle_pos - 1
 for g,i in grids.items():
     if i == idx:
         print(f"Part 2: {score(g)}")
