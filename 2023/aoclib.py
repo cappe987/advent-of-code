@@ -57,3 +57,5 @@ def grid_neighbours(grid, i, j):
 def grid_neighbours_diag(grid, i, j):
     return filter(lambda xy: in_range_grid(grid, xy[0], xy[1]), [(i-1,j-1), (i-1,j), (i-1,j+1), (i,j-1), (i,j+1), (i+1,j-1), (i+1,j), (i+1,j+1)])
 
+def manhattan_distance(p1, p2):
+    return abs(p2[0] - p1[0]) + abs(p2[1] - p1[1])
