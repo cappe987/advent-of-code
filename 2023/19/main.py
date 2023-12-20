@@ -3,32 +3,27 @@ sys.path.append('../')
 from aoclib import *
 
 data = open("example.txt").readlines()
-# data = open("example2.txt").readlines()
 data = open("input.txt").readlines()
 
-
-
-def parse_rule(line):
-    name, rules = line.split('{')
-    rules = rules[:-2]
-
-    rules = rules.split(',')
-    end = rules[-1]
-    rules = rules[:-1]
-    ruledata = []
-    for r in rules:
+def parse_workflow(line):
+    name, ruledata = line.split('{')
+    ruledata = ruledata[:-2]
+    ruledata = ruledata.split(',')
+    end = ruledata[-1]
+    ruledata = ruledata[:-1]
+    rules = []
+    for r in ruledata:
         cond, dest = r.split(':')
         if '<' in cond:
             var, num = cond.split('<')
             num = int(num)
-            ruledata.append((var, '<', num, dest))
+            rules.append((var, '<', num, dest))
         elif '>' in cond:
             var, num = cond.split('>')
             num = int(num)
-            ruledata.append((var, '>', num, dest))
+            rules.append((var, '>', num, dest))
 
-    # print(name, ruledata, end)
-    return (name, ruledata, end)
+    return (name, rules, end)
 
 def parse_item(line):
     line = line[1:-2].split(',')
@@ -39,45 +34,25 @@ def parse_item(line):
         d[name] = val
     return d
 
-
-def solve_item(rules, rulename, item):
-    if rulename == "R":
+# Part 1
+def solve_item(workflows, name, item):
+    if name == "R":
         return False
-    if rulename == "A":
+    if name == "A":
         return True
 
-    ruledata, end = rules[rulename]
-    # print(ruledata)
-    for (var, cmp, num, dest) in ruledata:
+    rules, end = workflows[name]
+    for (var, cmp, num, dest) in rules:
         if cmp == '<':
             if item[var] < num:
-                return solve_item(rules, dest, item)
+                return solve_item(workflows, dest, item)
         if cmp == '>':
             if item[var] > num:
-                return solve_item(rules, dest, item)
+                return solve_item(workflows, dest, item)
 
-    return solve_item(rules, end, item)
-    
+    return solve_item(workflows, end, item)
 
-
-rules, items = iter_split(data, lambda x: x == "\n")
-
-ruledict = {}
-for r in rules:
-    name, _r, end = parse_rule(r)
-    ruledict[name] = (_r, end)
-# print(ruledict)
-
-# parsed_items = []
-tot = 0
-for i in items:
-    item = parse_item(i)
-    if solve_item(ruledict, 'in', item):
-        tot += sum([item[x] for x in ['x', 'm', 'a', 's']])
-    # parsed_items.append(item)
-
-print(f"Part 1: {tot}")
-
+# Part 2
 def invert_rule(rule):
     var, cmp, num, dest = rule
     if cmp == '>':
@@ -88,36 +63,23 @@ def invert_rule(rule):
         num = num-1
     return (var,cmp,num)
 
-def invert_rules(rules):
-    new = []
-    for rule in rules:
-        new.append(invert_rule(rule))
-    return new
-
-def part2(rules, rulename, conds):
-    if rulename == "R":
+def find_paths(workflows, name, conds):
+    if name == "R":
         return []
-    if rulename == "A":
+    if name == "A":
         return conds
     tot = 0
-    ruledata, end = rules[rulename]
+    rules, end = workflows[name]
     new_conds = []
-    prev = []
-    for (var, cmp, num, dest) in ruledata:
-        c = part2(rules, dest, conds + prev + [(var,cmp,num)])
-        if len(c) != 0:
+    inverted = []
+    for (var, cmp, num, dest) in rules:
+        c = find_paths(workflows, dest, conds + inverted + [(var,cmp,num)])
+        if c:
             new_conds.append(c)
-        prev.append(invert_rule((var,cmp,num,dest)))
+        inverted.append(invert_rule((var,cmp,num,dest)))
 
-    # inverted = invert_rules(ruledata)
-    c = part2(rules, end, conds + prev)
-
-    # new_conds.append()
-    if len(c) != 0:
-        # print('C', rulename, c)
-        # print(rulename, c, '--------', inverted)
-        # inverted.extend(c)
-        # inverted.extend(c)
+    c = find_paths(workflows, end, conds + inverted)
+    if c:
         new_conds.append(c)
 
     return new_conds
@@ -125,7 +87,6 @@ def part2(rules, rulename, conds):
 def flatten(ls, res):
     if type(ls) != list:
         return
-    # print(ls)
     added = False
     for x in ls:
         if not added and type(x) != list:
@@ -133,23 +94,26 @@ def flatten(ls, res):
             added = True
         flatten(x, res)
  
-res = part2(ruledict, 'in', [])
-# print(res)
-# print(res[1])
+    
+rules, items = iter_split(data, lambda x: x == "\n")
 
-# print()
+ruledict = {}
+for r in rules:
+    name, _r, end = parse_workflow(r)
+    ruledict[name] = (_r, end)
+
+tot = 0
+for i in items:
+    item = parse_item(i)
+    if solve_item(ruledict, 'in', item):
+        tot += sum([item[x] for x in ['x', 'm', 'a', 's']])
+
+print(f"Part 1: {tot}")
 
 # All possible paths to get accepted
+res = find_paths(ruledict, 'in', [])
 flattened = []
 flatten(res, flattened)
-# for x in flattened:
-    # print(x)
-
-
-# Example:
-# 16740907986800
-
-# print('=============')
 
 ranges = []
 for x in flattened:
@@ -168,7 +132,6 @@ for x in flattened:
 
 tot = 0
 for rn in ranges:
-    # print(rn)
     tmp = 1
     for x in ['x', 'm', 'a', 's']:
         tmp *=  rn[x][1] - rn[x][0] + 1
