@@ -1,9 +1,9 @@
 import sys
 sys.path.append('../')
 from aoclib import *
+from math import floor
 
 data = open("example.txt").readlines()
-# data = open("example2.txt").readlines()
 data = open("input.txt").readlines()
 
 grid = [line.strip() for line in data]
@@ -11,50 +11,37 @@ grid = [line.strip() for line in data]
 def neighbours(i, j):
     return [(i-1,j), (i,j-1), (i,j+1), (i+1,j)]
 
-start = None
-for i in range(len(grid)):
-    for j in range(len(grid[0])):
-        if grid[i][j] == 'S':
-            start = (i,j)
-            break
+def f(n, y0, y1, y2):
+    a = (y2+y0-2*y1)/2
+    b = y1-y0 -a
+    c = y0
+    return a*n**2 + b*n +c
 
 
-odd = set()
-even = set([start])
+steps = 26501365
+period = 131
+offset = steps % period
 
-steps = 64
-# steps = 129
-# steps = 26501365
-# steps = 128
-
-curr = set([start])
+start = [(i,j) for j in range(len(grid[0])) for i in range(len(grid)) if grid[i][j] == 'S']
+prev = set(start)
+points = []
 for step in range(1, steps+1):
-    nxt = set()
-    for (i,j) in curr:
+    curr = set()
+    for (i,j) in prev:
         for (i2,j2) in neighbours(i, j):
-            if not in_range_grid(grid, i, j):
+            i3,j3 = i2 % len(grid), j2 % len(grid[0])
+            if grid[i3][j3] == '#':
                 continue
-            if grid[i2][j2] == '#':
-                continue
-            nxt.add((i2,j2))
-            if step % 2 == 0:
-                even.add((i2,j2))
-            else:
-                odd.add((i2,j2))
+            curr.add((i2,j2))
 
-    curr = nxt
+    if step == 64:
+        print(f"Part 1: {len(curr)}")
+    if step in [offset, offset + period, offset + period*2]:
+        points.append(len(curr))
+        if len(points) == 3:
+            break
+    prev = curr
         
-# for i in range(len(grid)):
-    # for j in range(len(grid[0])):
-        # if (i,j) in curr:
-            # print('O', end='')
-        # else:
-            # print(grid[i][j], end='')
-    # print()
+res = floor(f(steps//period, points[0], points[1], points[2]))
+print(f"Part 2: {res}")
 
-print(len(curr))
-
-
-
-# print(f"Part 1: {res}")
-# print(f"Part 2: {res}")
